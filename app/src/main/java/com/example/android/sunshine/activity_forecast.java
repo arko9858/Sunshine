@@ -1,14 +1,18 @@
 package com.example.android.sunshine;
 
+import android.content.Context;
 import android.graphics.Path;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.utilities.NetworkUtils;
@@ -18,9 +22,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.zip.Inflater;
 
-public class activity_forecast extends AppCompatActivity {
+public class activity_forecast extends AppCompatActivity implements ForecastAdapter.ForecastAdapterOnClickHandler1 {
 
-    TextView mWeatherTextView;
+    private RecyclerView mRecyclerView;
+    private ForecastAdapter mForecastAdapter;
+    private Toast mToast;
     TextView mErrorTextView;
     ProgressBar loadingProgressBar;
 
@@ -29,10 +35,19 @@ public class activity_forecast extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
 
-        mWeatherTextView = (TextView) findViewById(R.id.tv_weather_data);
+        mRecyclerView = (RecyclerView) findViewById(R.id.rv_forecast);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        layoutManager.setReverseLayout(false);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setHasFixedSize(true);
+
+        mForecastAdapter = new ForecastAdapter(this);
+        mRecyclerView.setAdapter(mForecastAdapter);
+
         mErrorTextView = (TextView) findViewById(R.id.tv_error_msg);
         loadingProgressBar = (ProgressBar) findViewById(R.id.pb_loading);
-
         loadWeatherData();
     }
 
@@ -42,14 +57,25 @@ public class activity_forecast extends AppCompatActivity {
         new ConnectingToTheInternet().execute(location);
     }
 
+    @Override
+    public void interfaceMethod(String x) {
+        Context context = this;
+
+        if (mToast!=null){
+            mToast.cancel();
+        }
+        mToast =  Toast.makeText(this, x, Toast.LENGTH_LONG);
+        mToast.show();
+    }
+
     public void showWeatherDataView() {
         mErrorTextView.setVisibility(View.INVISIBLE);
-        mWeatherTextView.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.VISIBLE);
     }
 
     public void showErrorMsg() {
         mErrorTextView.setVisibility(View.VISIBLE);
-        mWeatherTextView.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.INVISIBLE);
     }
 
     public class ConnectingToTheInternet extends AsyncTask<String, Void, String[]> {
@@ -88,9 +114,7 @@ public class activity_forecast extends AppCompatActivity {
                  * the "\n\n\n" after the String is to give visual separation between each String in the
                  * TextView. Later, we'll learn about a better way to display lists of data.
                  */
-                for (String weatherString : strings) {
-                    mWeatherTextView.append((weatherString) + "\n\n\n");
-                }
+                mForecastAdapter.setWeatherData(strings);
             }else{
                 showErrorMsg();
             }
@@ -108,6 +132,7 @@ public class activity_forecast extends AppCompatActivity {
         int selectedItemId = item.getItemId();
 
         if (selectedItemId == R.id.action_refresh) {
+            mRecyclerView.setAdapter(null);
             loadWeatherData();
             return true;
         }
