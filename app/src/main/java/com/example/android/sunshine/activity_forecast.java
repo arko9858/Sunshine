@@ -1,6 +1,7 @@
 package com.example.android.sunshine;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Path;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -35,7 +36,7 @@ public class activity_forecast extends AppCompatActivity implements ForecastAdap
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_forecast);
+        mRecyclerView = findViewById(R.id.rv_forecast);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -46,8 +47,8 @@ public class activity_forecast extends AppCompatActivity implements ForecastAdap
         mForecastAdapter = new ForecastAdapter(this);
         mRecyclerView.setAdapter(mForecastAdapter);
 
-        mErrorTextView = (TextView) findViewById(R.id.tv_error_msg);
-        loadingProgressBar = (ProgressBar) findViewById(R.id.pb_loading);
+        mErrorTextView = findViewById(R.id.tv_error_msg);
+        loadingProgressBar = findViewById(R.id.pb_loading);
         loadWeatherData();
     }
 
@@ -57,15 +58,20 @@ public class activity_forecast extends AppCompatActivity implements ForecastAdap
         new ConnectingToTheInternet().execute(location);
     }
 
+    //interfaceMethod is onClick
     @Override
     public void interfaceMethod(String x) {
         Context context = this;
 
-        if (mToast!=null){
-            mToast.cancel();
-        }
-        mToast =  Toast.makeText(this, x, Toast.LENGTH_LONG);
-        mToast.show();
+        Intent intent = new Intent(context,DetailActivity.class);
+        intent.putExtra("WeatherDataFromActivityForecast",x);
+        startActivity(intent);
+
+//        if (mToast!=null){
+//            mToast.cancel();
+//        }
+//        mToast =  Toast.makeText(this, x, Toast.LENGTH_LONG);
+//        mToast.show();
     }
 
     public void showWeatherDataView() {
@@ -133,6 +139,7 @@ public class activity_forecast extends AppCompatActivity implements ForecastAdap
 
         if (selectedItemId == R.id.action_refresh) {
             mRecyclerView.setAdapter(null);
+            mRecyclerView.setAdapter(mForecastAdapter);
             loadWeatherData();
             return true;
         }
