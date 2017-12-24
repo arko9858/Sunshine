@@ -3,7 +3,9 @@ package com.example.android.sunshine;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Path;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +33,8 @@ public class activity_forecast extends AppCompatActivity implements ForecastAdap
     private Toast mToast;
     TextView mErrorTextView;
     ProgressBar loadingProgressBar;
+    private String mWeatherLocation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,17 +59,20 @@ public class activity_forecast extends AppCompatActivity implements ForecastAdap
 
     public void loadWeatherData() {
         showWeatherDataView();
-        String location = SunshinePreferences.getPreferredWeatherLocation(this);
-        new ConnectingToTheInternet().execute(location);
+        mWeatherLocation = SunshinePreferences.getPreferredWeatherLocation(this);
+
+        Double[] locationCoordinates;
+
+        new ConnectingToTheInternet().execute(mWeatherLocation);
     }
 
     //interfaceMethod is onClick
     @Override
-    public void interfaceMethod(String x) {
+    public void interfaceMethodOnClick(String x) {
         Context context = this;
 
-        Intent intent = new Intent(context,DetailActivity.class);
-        intent.putExtra("WeatherDataFromActivityForecast",x);
+        Intent intent = new Intent(context, DetailActivity.class);
+        intent.putExtra("WeatherDataFromActivityForecast", x);
         startActivity(intent);
 
 //        if (mToast!=null){
@@ -121,7 +129,7 @@ public class activity_forecast extends AppCompatActivity implements ForecastAdap
                  * TextView. Later, we'll learn about a better way to display lists of data.
                  */
                 mForecastAdapter.setWeatherData(strings);
-            }else{
+            } else {
                 showErrorMsg();
             }
         }
@@ -137,12 +145,48 @@ public class activity_forecast extends AppCompatActivity implements ForecastAdap
     public boolean onOptionsItemSelected(MenuItem item) {
         int selectedItemId = item.getItemId();
 
-        if (selectedItemId == R.id.action_refresh) {
-            mRecyclerView.setAdapter(null);
-            mRecyclerView.setAdapter(mForecastAdapter);
-            loadWeatherData();
-            return true;
+
+        switch (selectedItemId) {
+            case R.id.action_refresh:
+                mRecyclerView.setAdapter(null);
+                mRecyclerView.setAdapter(mForecastAdapter);
+                loadWeatherData();
+                break;
+            case R.id.action_open_map:
+                openMap(null,null,mWeatherLocation);
+                break;
         }
+
+
         return super.onOptionsItemSelected(item);
     }
+
+    public void openMap(Double x, Double y, String searchLocationQuery) {
+
+        String scheme = "geo:";
+        Double defaultZoom = 5.0;
+
+        if((x==null || y==null) && searchLocationQuery ==null){
+            x = 0.0;
+            y = 0.0;
+            searchLocationQuery = "Kuala Lampur";
+        }
+
+
+
+        String uriString = scheme + String.valueOf(x) + "," + String.valueOf(y) +"?q=" + searchLocationQuery /*+ "&z=" +
+                String.valueOf(defaultZoom)*/;
+
+        Uri uri = Uri.parse(uriString);
+
+
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(uri);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+
 }

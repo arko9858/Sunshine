@@ -7,6 +7,7 @@
 
     <string name="refresh">Refresh</string>
 
+    <string name="openMap">Map Location</string>
     <string name="error_msg">An error has occurred! Please try again.</string>
     <!-- - - - - - - - - - - - - -->
     <!--Used by SunshineDateUtils-->

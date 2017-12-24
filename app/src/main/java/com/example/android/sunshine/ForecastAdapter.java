@@ -21,7 +21,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     final private ForecastAdapterOnClickHandler1 mClickHandler;
 
     public interface ForecastAdapterOnClickHandler1 {
-        public void interfaceMethod(String x);
+        void interfaceMethodOnClick(String x);
     }
 
     public ForecastAdapter(ForecastAdapterOnClickHandler1 onClickHandler1) {
@@ -31,8 +31,6 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     public class ForecastAdapterViewHolder1 extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final TextView mWeatherTextView;
-        private RecyclerView mRecyclerView;
-        private ForecastAdapter mForecastAdapter;
 
         public ForecastAdapterViewHolder1(View itemView) {
             super(itemView);
@@ -43,7 +41,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         @Override
         public void onClick(View view) {
             String weatherForDay = mWeatherData[getAdapterPosition()];
-            mClickHandler.interfaceMethod(weatherForDay);
+            mClickHandler.interfaceMethodOnClick(weatherForDay);
         }
     }
 
